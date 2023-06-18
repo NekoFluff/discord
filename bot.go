@@ -76,7 +76,9 @@ func (bot *Bot) RegisterCommands() {
 // message is created on any channel that the authenticated bot has access to.
 func (bot *Bot) handleInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if cmd, ok := bot.Commands[i.ApplicationCommandData().Name]; ok {
-		cmd.Handler(s, i)
+		if handler, ok := cmd.Handler.(func(s *discordgo.Session, i *discordgo.InteractionCreate)); ok {
+			handler(s, i)
+		}
 	}
 }
 
