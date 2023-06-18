@@ -6,5 +6,5 @@ import (
 
 type Command struct {
 	Command discordgo.ApplicationCommand
-	Handler func(s *discordgo.Session, m *discordgo.InteractionCreate)
+	Handler interface{}
 }
