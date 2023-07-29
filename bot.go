@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -76,9 +77,13 @@ func (bot *Bot) RegisterCommands() {
 // message is created on any channel that the authenticated bot has access to.
 func (bot *Bot) handleInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if cmd, ok := bot.Commands[i.ApplicationCommandData().Name]; ok {
-		if handler, ok := cmd.Handler.(func(s *discordgo.Session, i *discordgo.InteractionCreate)); ok {
-			handler(s, i)
-		}
+		// if handler, ok := cmd.Handler.(func(s *discordgo.Session, i *discordgo.InteractionCreate)); ok {
+		// 	handler(s, i)
+		// }
+		reflect.ValueOf(cmd.Handler).Call([]reflect.Value{
+			reflect.ValueOf(s),
+			reflect.ValueOf(i),
+		})
 	}
 }
 
