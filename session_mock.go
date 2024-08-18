@@ -1535,16 +1535,15 @@ func (mr *MockSessionMockRecorder) GuildCreateWithTemplate(templateCode, name, i
 }
 
 // GuildDelete mocks base method.
-func (m *MockSession) GuildDelete(guildID string, options ...discordgo.RequestOption) (*discordgo.Guild, error) {
+func (m *MockSession) GuildDelete(guildID string, options ...discordgo.RequestOption) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{guildID}
 	for _, a := range options {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GuildDelete", varargs...)
-	ret0, _ := ret[0].(*discordgo.Guild)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // GuildDelete indicates an expected call of GuildDelete.
@@ -3189,10 +3188,10 @@ func (mr *MockSessionMockRecorder) ThreadLeave(id interface{}, options ...interf
 }
 
 // ThreadMember mocks base method.
-func (m *MockSession) ThreadMember(threadID, memberID string, options ...discordgo.RequestOption) (*discordgo.ThreadMember, error) {
+func (m *MockSession) ThreadMember(arg0, arg1 string, arg2 bool, arg3 ...discordgo.RequestOption) (*discordgo.ThreadMember, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{threadID, memberID}
-	for _, a := range options {
+	varargs := []interface{}{arg0, arg1, arg2}
+	for _, a := range arg3 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ThreadMember", varargs...)
@@ -3202,9 +3201,9 @@ func (m *MockSession) ThreadMember(threadID, memberID string, options ...discord
 }
 
 // ThreadMember indicates an expected call of ThreadMember.
-func (mr *MockSessionMockRecorder) ThreadMember(threadID, memberID interface{}, options ...interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) ThreadMember(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{threadID, memberID}, options...)
+	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ThreadMember", reflect.TypeOf((*MockSession)(nil).ThreadMember), varargs...)
 }
 
@@ -3247,10 +3246,10 @@ func (mr *MockSessionMockRecorder) ThreadMemberRemove(threadID, memberID interfa
 }
 
 // ThreadMembers mocks base method.
-func (m *MockSession) ThreadMembers(threadID string, options ...discordgo.RequestOption) ([]*discordgo.ThreadMember, error) {
+func (m *MockSession) ThreadMembers(arg0 string, arg1 int, arg2 bool, arg3 string, arg4 ...discordgo.RequestOption) ([]*discordgo.ThreadMember, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{threadID}
-	for _, a := range options {
+	varargs := []interface{}{arg0, arg1, arg2, arg3}
+	for _, a := range arg4 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ThreadMembers", varargs...)
@@ -3260,9 +3259,9 @@ func (m *MockSession) ThreadMembers(threadID string, options ...discordgo.Reques
 }
 
 // ThreadMembers indicates an expected call of ThreadMembers.
-func (mr *MockSessionMockRecorder) ThreadMembers(threadID interface{}, options ...interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) ThreadMembers(arg0, arg1, arg2, arg3 interface{}, arg4 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{threadID}, options...)
+	varargs := append([]interface{}{arg0, arg1, arg2, arg3}, arg4...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ThreadMembers", reflect.TypeOf((*MockSession)(nil).ThreadMembers), varargs...)
 }
 
@@ -3626,10 +3625,10 @@ func (mr *MockSessionMockRecorder) UserGuildMember(guildID interface{}, options 
 }
 
 // UserGuilds mocks base method.
-func (m *MockSession) UserGuilds(limit int, beforeID, afterID string, options ...discordgo.RequestOption) ([]*discordgo.UserGuild, error) {
+func (m *MockSession) UserGuilds(arg0 int, arg1, arg2 string, arg3 bool, arg4 ...discordgo.RequestOption) ([]*discordgo.UserGuild, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{limit, beforeID, afterID}
-	for _, a := range options {
+	varargs := []interface{}{arg0, arg1, arg2, arg3}
+	for _, a := range arg4 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "UserGuilds", varargs...)
@@ -3639,9 +3638,9 @@ func (m *MockSession) UserGuilds(limit int, beforeID, afterID string, options ..
 }
 
 // UserGuilds indicates an expected call of UserGuilds.
-func (mr *MockSessionMockRecorder) UserGuilds(limit, beforeID, afterID interface{}, options ...interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) UserGuilds(arg0, arg1, arg2, arg3 interface{}, arg4 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{limit, beforeID, afterID}, options...)
+	varargs := append([]interface{}{arg0, arg1, arg2, arg3}, arg4...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserGuilds", reflect.TypeOf((*MockSession)(nil).UserGuilds), varargs...)
 }
 
@@ -3764,42 +3763,42 @@ func (mr *MockSessionMockRecorder) WebhookDeleteWithToken(webhookID, token inter
 }
 
 // WebhookEdit mocks base method.
-func (m *MockSession) WebhookEdit(webhookID, name, avatar, channelID string, options ...discordgo.RequestOption) (*discordgo.Role, error) {
+func (m *MockSession) WebhookEdit(arg0, arg1, arg2, arg3 string, arg4 ...discordgo.RequestOption) (*discordgo.Webhook, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{webhookID, name, avatar, channelID}
-	for _, a := range options {
+	varargs := []interface{}{arg0, arg1, arg2, arg3}
+	for _, a := range arg4 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "WebhookEdit", varargs...)
-	ret0, _ := ret[0].(*discordgo.Role)
+	ret0, _ := ret[0].(*discordgo.Webhook)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WebhookEdit indicates an expected call of WebhookEdit.
-func (mr *MockSessionMockRecorder) WebhookEdit(webhookID, name, avatar, channelID interface{}, options ...interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) WebhookEdit(arg0, arg1, arg2, arg3 interface{}, arg4 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{webhookID, name, avatar, channelID}, options...)
+	varargs := append([]interface{}{arg0, arg1, arg2, arg3}, arg4...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebhookEdit", reflect.TypeOf((*MockSession)(nil).WebhookEdit), varargs...)
 }
 
 // WebhookEditWithToken mocks base method.
-func (m *MockSession) WebhookEditWithToken(webhookID, token, name, avatar string, options ...discordgo.RequestOption) (*discordgo.Role, error) {
+func (m *MockSession) WebhookEditWithToken(arg0, arg1, arg2, arg3 string, arg4 ...discordgo.RequestOption) (*discordgo.Webhook, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{webhookID, token, name, avatar}
-	for _, a := range options {
+	varargs := []interface{}{arg0, arg1, arg2, arg3}
+	for _, a := range arg4 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "WebhookEditWithToken", varargs...)
-	ret0, _ := ret[0].(*discordgo.Role)
+	ret0, _ := ret[0].(*discordgo.Webhook)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WebhookEditWithToken indicates an expected call of WebhookEditWithToken.
-func (mr *MockSessionMockRecorder) WebhookEditWithToken(webhookID, token, name, avatar interface{}, options ...interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) WebhookEditWithToken(arg0, arg1, arg2, arg3 interface{}, arg4 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{webhookID, token, name, avatar}, options...)
+	varargs := append([]interface{}{arg0, arg1, arg2, arg3}, arg4...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebhookEditWithToken", reflect.TypeOf((*MockSession)(nil).WebhookEditWithToken), varargs...)
 }
 
