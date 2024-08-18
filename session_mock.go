@@ -11,7 +11,7 @@ import (
 	time "time"
 
 	discordgo "github.com/bwmarrin/discordgo"
-	gomock "go.uber.org/mock/gomock"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockSession is a mock of Session interface.
