@@ -2,7 +2,7 @@ package discord
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"reflect"
 
 	"github.com/bwmarrin/discordgo"
@@ -17,7 +17,7 @@ type Bot struct {
 func NewBot(token string) *Bot {
 	session, err := createSession(token)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	bot := &Bot{
@@ -28,7 +28,7 @@ func NewBot(token string) *Bot {
 
 	bot.Session.AddHandler(bot.handleInteractionCreate)
 	bot.Session.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
+		slog.Info(fmt.Sprintf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator))
 	})
 	return bot
 }
@@ -42,7 +42,7 @@ func createSession(Token string) (s *discordgo.Session, err error) {
 	// Create a new Discord session using the provided bot token.
 	s, err = discordgo.New("Bot " + Token)
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
+		slog.Error("Failed to create Discord session", "error", err)
 		return
 	}
 
@@ -51,7 +51,7 @@ func createSession(Token string) (s *discordgo.Session, err error) {
 	// Open a websocket connection to Discord and begin listening.
 	err = s.Open()
 	if err != nil {
-		fmt.Println("error opening connection,", err)
+		slog.Error("Failed to open websocket connection", "error", err)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (bot *Bot) RegisterCommands() {
 	for _, cmd := range bot.Commands {
 		cmd, err := bot.Session.ApplicationCommandCreate(bot.Session.State.User.ID, "", &cmd.Command)
 		if err != nil {
-			log.Panicf("Cannot create '%v' command: %v", cmd.Name, err)
+			slog.Error(fmt.Sprintf("Cannot create '%v' command", cmd), "error", err)
 		}
 	}
 }
@@ -109,8 +109,7 @@ func (bot *Bot) SendChannelMessage(channelName string, message string) {
 				message,
 			)
 			if err != nil {
-				log.Println("An error occurred while sending a message to a discord server")
-				log.Println(err)
+				slog.Error("Failed to send channel message", "error", err, "channel", c.ID)
 			}
 		}
 	}
@@ -120,12 +119,12 @@ func (bot *Bot) SendDeveloperMessage(message string) {
 	for _, developerId := range bot.DeveloperIDs {
 		ch, err := bot.Session.UserChannelCreate(developerId)
 		if err != nil {
-			fmt.Println(err)
+			slog.Error("Failed to create DM channel", "error", err, "user", developerId)
 			return
 		}
 		_, err = bot.Session.ChannelMessageSend(ch.ID, message)
 		if err != nil {
-			fmt.Println(err)
+			slog.Error("Failed to send developer message", "error", err, "channel", ch.ID)
 			return
 		}
 	}
@@ -153,8 +152,7 @@ func (bot *Bot) SendEmbedMessage(channelName string, message *discordgo.MessageE
 				message,
 			)
 			if err != nil {
-				log.Println("An error occurred while sending a message to a discord server")
-				log.Println(err)
+				slog.Error("An error occurred while sending a message to a discord server", "error", err)
 			}
 		}
 	}
