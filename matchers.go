@@ -11,6 +11,10 @@ type ContainsInteractionResponseMatcher struct {
 	msg string
 }
 
+func ContainsInteractionResponse(msg string) ContainsInteractionResponseMatcher {
+	return ContainsInteractionResponseMatcher{msg: msg}
+}
+
 func (m ContainsInteractionResponseMatcher) Matches(input interface{}) bool {
 	response, ok := input.(*discordgo.InteractionResponse)
 	if !ok {
