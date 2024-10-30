@@ -65,11 +65,19 @@ func (bot *Bot) AddCommands(cmds ...Command) {
 }
 
 func (bot *Bot) RegisterCommands() {
+	cmds := make([]*discordgo.ApplicationCommand, 0, len(bot.Commands))
 	for _, cmd := range bot.Commands {
-		_, err := bot.Session.ApplicationCommandCreate(bot.Session.State.User.ID, "", &cmd.Command)
-		if err != nil {
-			slog.Error(fmt.Sprintf("Cannot create '%v' command", cmd), "error", err)
-		}
+		cmds = append(cmds, &cmd.Command)
+	}
+
+	_, err := bot.Session.ApplicationCommandBulkOverwrite(
+		bot.Session.State.User.ID,
+		"",
+		cmds,
+	)
+
+	if err != nil {
+		slog.Error("Failed to register commands", "error", err)
 	}
 }
 
