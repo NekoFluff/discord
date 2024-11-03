@@ -64,7 +64,7 @@ func (bot *Bot) AddCommands(cmds ...Command) {
 	}
 }
 
-func (bot *Bot) RegisterCommands() {
+func (bot *Bot) RegisterCommands(guildID string) {
 	cmds := make([]*discordgo.ApplicationCommand, 0, len(bot.Commands))
 	for _, cmd := range bot.Commands {
 		cmds = append(cmds, &cmd.Command)
@@ -72,7 +72,7 @@ func (bot *Bot) RegisterCommands() {
 
 	_, err := bot.Session.ApplicationCommandBulkOverwrite(
 		bot.Session.State.User.ID,
-		"",
+		guildID,
 		cmds,
 	)
 
@@ -85,9 +85,6 @@ func (bot *Bot) RegisterCommands() {
 // message is created on any channel that the authenticated bot has access to.
 func (bot *Bot) handleInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if cmd, ok := bot.Commands[i.ApplicationCommandData().Name]; ok {
-		// if handler, ok := cmd.Handler.(func(s *discordgo.Session, i *discordgo.InteractionCreate)); ok {
-		// 	handler(s, i)
-		// }
 		reflect.ValueOf(cmd.Handler).Call([]reflect.Value{
 			reflect.ValueOf(s),
 			reflect.ValueOf(i),
