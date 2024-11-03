@@ -1,0 +1,21 @@
+name: Publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.23.x
+      - name: Publish
+        run: GOPROXY=proxy.golang.org go list -m github.com/NekoFluff/discord@${{ github.ref_name }}

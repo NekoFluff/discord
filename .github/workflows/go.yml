@@ -28,6 +28,3 @@ jobs:
         uses: go-semantic-release/action@v1.17.0
         with:
           github-token: ${{ secrets.TOKEN }}
-      - name: Publish
-        if: steps.semrel.outputs.version != ''
-        run: GOPROXY=proxy.golang.org go list -m github.com/NekoFluff/discord@${{steps.semrel.outputs.version}}
