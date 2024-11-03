@@ -73,6 +73,8 @@ func (bot *Bot) ClearCommands(guildID string) {
 			slog.Error("Failed to delete commands", "error", err)
 		}
 	}
+
+	bot.Commands = make(map[string]Command)
 }
 
 func (bot *Bot) RegisterCommands(guildID string) {
