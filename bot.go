@@ -64,6 +64,17 @@ func (bot *Bot) AddCommands(cmds ...Command) {
 	}
 }
 
+func (bot *Bot) ClearCommands(guildID string) {
+	cmds, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, guildID)
+
+	for _, cmd := range cmds {
+		err := bot.Session.ApplicationCommandDelete(bot.Session.State.User.ID, guildID, cmd.ID)
+		if err != nil {
+			slog.Error("Failed to delete commands", "error", err)
+		}
+	}
+}
+
 func (bot *Bot) RegisterCommands(guildID string) {
 	cmds := make([]*discordgo.ApplicationCommand, 0, len(bot.Commands))
 	for _, cmd := range bot.Commands {
