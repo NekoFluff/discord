@@ -25,6 +25,10 @@ jobs:
       run: go test -v ./...
 
     - name: go-semantic-release
+      id: semrel
       uses: go-semantic-release/action@v1.17.0
       with:
         github-token: ${{ secrets.TOKEN }}
+    - name: Publish
+      if: steps.semrel.outputs.version != ''
+      run: GOPROXY=proxy.golang.org go list -m NekoFluff.com/discord@${{steps.semrel.outputs.version}}
