@@ -3,7 +3,7 @@ package discord
 import (
 	"fmt"
 	"log/slog"
-	"reflect"
+	"sync"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -12,6 +12,9 @@ type Bot struct {
 	Session      *discordgo.Session
 	Commands     map[string]Command
 	DeveloperIDs []string
+
+	dmMu       sync.Mutex
+	dmChannels map[string]string // userID → channel ID cache
 }
 
 func NewBot(token string) *Bot {
@@ -21,9 +24,9 @@ func NewBot(token string) *Bot {
 	}
 
 	bot := &Bot{
-		Session:      session,
-		Commands:     make(map[string]Command),
-		DeveloperIDs: []string{},
+		Session:    session,
+		Commands:   make(map[string]Command),
+		dmChannels: make(map[string]string),
 	}
 
 	bot.Session.AddHandler(bot.handleInteractionCreate)
@@ -34,12 +37,10 @@ func NewBot(token string) *Bot {
 }
 
 func (bot *Bot) Stop() {
-	// Cleanly close down the Discord session.
 	bot.Session.Close()
 }
 
 func createSession(Token string) (s *discordgo.Session, err error) {
-	// Create a new Discord session using the provided bot token.
 	s, err = discordgo.New("Bot " + Token)
 	if err != nil {
 		slog.Error("Failed to create Discord session", "error", err)
@@ -48,7 +49,6 @@ func createSession(Token string) (s *discordgo.Session, err error) {
 
 	s.Identify.Intents = discordgo.IntentsGuildMessages
 
-	// Open a websocket connection to Discord and begin listening.
 	err = s.Open()
 	if err != nil {
 		slog.Error("Failed to open websocket connection", "error", err)
@@ -88,90 +88,91 @@ func (bot *Bot) RegisterCommands(guildID string) {
 		guildID,
 		cmds,
 	)
-
 	if err != nil {
 		slog.Error("Failed to register commands", "error", err)
 	}
 }
 
-// This function will be called every time a new
-// message is created on any channel that the authenticated bot has access to.
 func (bot *Bot) handleInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if cmd, ok := bot.Commands[i.ApplicationCommandData().Name]; ok {
-		reflect.ValueOf(cmd.Handler).Call([]reflect.Value{
-			reflect.ValueOf(s),
-			reflect.ValueOf(i),
-		})
+		cmd.Handler(s, i)
 	}
 }
 
-func (bot *Bot) SendChannelMessage(channelName string, message string) {
+// channelIDByName returns the first text channel ID matching name across all cached guilds.
+func (bot *Bot) channelIDByName(name string) (string, bool) {
 	for _, guild := range bot.Session.State.Guilds {
-		// Get channels for this guild (a.k.a discord server)
-		channels, _ := bot.Session.GuildChannels(guild.ID)
-
-		for _, c := range channels {
-			// Ensure the channel is a guild text channel and not a voice or DM channel
-			if c.Type != discordgo.ChannelTypeGuildText {
-				continue
-			}
-
-			// Check if the channel name matches target name
-			if c.Name != channelName {
-				continue
-			}
-
-			// Send a message to the discord channel
-			_, err := bot.Session.ChannelMessageSend(
-				c.ID,
-				message,
-			)
-			if err != nil {
-				slog.Error("Failed to send channel message", "error", err, "channel", c.ID)
+		for _, ch := range guild.Channels {
+			if ch.Type == discordgo.ChannelTypeGuildText && ch.Name == name {
+				return ch.ID, true
 			}
 		}
+	}
+	return "", false
+}
+
+// dmChannelID returns the cached DM channel ID for a user, creating it if necessary.
+func (bot *Bot) dmChannelID(userID string) (string, error) {
+	bot.dmMu.Lock()
+	defer bot.dmMu.Unlock()
+
+	if id, ok := bot.dmChannels[userID]; ok {
+		return id, nil
+	}
+
+	ch, err := bot.Session.UserChannelCreate(userID)
+	if err != nil {
+		return "", err
+	}
+
+	bot.dmChannels[userID] = ch.ID
+	return ch.ID, nil
+}
+
+func (bot *Bot) SendChannelMessage(channelName string, message string) {
+	chID, ok := bot.channelIDByName(channelName)
+	if !ok {
+		slog.Warn("Channel not found", "channel", channelName)
+		return
+	}
+	if _, err := bot.Session.ChannelMessageSend(chID, message); err != nil {
+		slog.Error("Failed to send channel message", "error", err, "channel", channelName)
+	}
+}
+
+func (bot *Bot) SendEmbedMessage(channelName string, embed *discordgo.MessageEmbed) {
+	chID, ok := bot.channelIDByName(channelName)
+	if !ok {
+		slog.Warn("Channel not found", "channel", channelName)
+		return
+	}
+	if _, err := bot.Session.ChannelMessageSendEmbed(chID, embed); err != nil {
+		slog.Error("Failed to send embed message", "error", err, "channel", channelName)
 	}
 }
 
 func (bot *Bot) SendDeveloperMessage(message string) {
-	for _, developerId := range bot.DeveloperIDs {
-		ch, err := bot.Session.UserChannelCreate(developerId)
+	for _, userID := range bot.DeveloperIDs {
+		chID, err := bot.dmChannelID(userID)
 		if err != nil {
-			slog.Error("Failed to create DM channel", "error", err, "user", developerId)
-			return
+			slog.Error("Failed to create DM channel", "error", err, "user", userID)
+			continue
 		}
-		_, err = bot.Session.ChannelMessageSend(ch.ID, message)
-		if err != nil {
-			slog.Error("Failed to send developer message", "error", err, "channel", ch.ID)
-			return
+		if _, err := bot.Session.ChannelMessageSend(chID, message); err != nil {
+			slog.Error("Failed to send developer message", "error", err, "user", userID)
 		}
 	}
 }
 
-func (bot *Bot) SendEmbedMessage(channelName string, message *discordgo.MessageEmbed) {
-	for _, guild := range bot.Session.State.Guilds {
-		// Get channels for this guild (a.k.a discord server)
-		channels, _ := bot.Session.GuildChannels(guild.ID)
-
-		for _, c := range channels {
-			// Ensure the channel is a guild text channel and not a voice or DM channel
-			if c.Type != discordgo.ChannelTypeGuildText {
-				continue
-			}
-
-			// Check if the channel name matches target name
-			if c.Name != channelName {
-				continue
-			}
-
-			// Send a message to the discord channel
-			_, err := bot.Session.ChannelMessageSendEmbed(
-				c.ID,
-				message,
-			)
-			if err != nil {
-				slog.Error("An error occurred while sending a message to a discord server", "error", err)
-			}
+func (bot *Bot) SendDeveloperEmbed(embed *discordgo.MessageEmbed) {
+	for _, userID := range bot.DeveloperIDs {
+		chID, err := bot.dmChannelID(userID)
+		if err != nil {
+			slog.Error("Failed to create DM channel", "error", err, "user", userID)
+			continue
+		}
+		if _, err := bot.Session.ChannelMessageSendEmbed(chID, embed); err != nil {
+			slog.Error("Failed to send developer embed", "error", err, "user", userID)
 		}
 	}
 }
