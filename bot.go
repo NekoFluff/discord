@@ -93,6 +93,22 @@ func (bot *Bot) RegisterCommands(guildID string) {
 	}
 }
 
+func (bot *Bot) RegisterGlobalCommands() {
+	cmds := make([]*discordgo.ApplicationCommand, 0, len(bot.Commands))
+	for _, cmd := range bot.Commands {
+		cmds = append(cmds, &cmd.Command)
+	}
+
+	_, err := bot.Session.ApplicationCommandBulkOverwrite(
+		bot.Session.State.User.ID,
+		"",
+		cmds,
+	)
+	if err != nil {
+		slog.Error("Failed to register global commands", "error", err)
+	}
+}
+
 func (bot *Bot) handleInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if cmd, ok := bot.Commands[i.ApplicationCommandData().Name]; ok {
 		cmd.Handler(s, i)
