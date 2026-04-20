@@ -3651,9 +3651,9 @@ func (mr *MockSessionMockRecorder) UserGuilds(arg0, arg1, arg2, arg3 any, arg4 .
 }
 
 // UserUpdate mocks base method.
-func (m *MockSession) UserUpdate(username, avatar string, options ...discordgo.RequestOption) (*discordgo.User, error) {
+func (m *MockSession) UserUpdate(username, avatar, banner string, options ...discordgo.RequestOption) (*discordgo.User, error) {
 	m.ctrl.T.Helper()
-	varargs := []any{username, avatar}
+	varargs := []any{username, avatar, banner}
 	for _, a := range options {
 		varargs = append(varargs, a)
 	}
@@ -3664,9 +3664,9 @@ func (m *MockSession) UserUpdate(username, avatar string, options ...discordgo.R
 }
 
 // UserUpdate indicates an expected call of UserUpdate.
-func (mr *MockSessionMockRecorder) UserUpdate(username, avatar any, options ...any) *gomock.Call {
+func (mr *MockSessionMockRecorder) UserUpdate(username, avatar, banner any, options ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{username, avatar}, options...)
+	varargs := append([]any{username, avatar, banner}, options...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserUpdate", reflect.TypeOf((*MockSession)(nil).UserUpdate), varargs...)
 }
 

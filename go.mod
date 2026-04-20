@@ -3,7 +3,7 @@ module github.com/NekoFluff/discord
 go 1.23
 
 require (
-	github.com/bwmarrin/discordgo v0.28.1
+	github.com/bwmarrin/discordgo v0.29.0
 	go.uber.org/mock v0.5.0
 )
 

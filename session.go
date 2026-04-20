@@ -16,7 +16,7 @@ type Session interface {
 	User(userID string, options ...discordgo.RequestOption) (st *discordgo.User, err error)
 	UserAvatar(userID string, options ...discordgo.RequestOption) (img image.Image, err error)
 	UserAvatarDecode(u *discordgo.User, options ...discordgo.RequestOption) (img image.Image, err error)
-	UserUpdate(username, avatar string, options ...discordgo.RequestOption) (st *discordgo.User, err error)
+	UserUpdate(username, avatar, banner string, options ...discordgo.RequestOption) (st *discordgo.User, err error)
 	UserConnections(options ...discordgo.RequestOption) (conn []*discordgo.UserConnection, err error)
 	UserChannelCreate(recipientID string, options ...discordgo.RequestOption) (st *discordgo.Channel, err error)
 	UserGuildMember(guildID string, options ...discordgo.RequestOption) (st *discordgo.Member, err error)
